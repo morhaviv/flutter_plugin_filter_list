@@ -1,11 +1,13 @@
 part of 'filter_list_dialog.dart';
 
-typedef ValidateSelectedItem<T> = bool Function(List<T>? list, T item);
-typedef OnApplyButtonClick<T> = Function(List<T>? list);
-typedef ChoiceChipBuilder<T> = Widget Function(BuildContext context, T? item, bool? iselected);
-typedef ItemSearchDelegate<T> = List<T> Function(List<T>? list, String text);
-typedef LabelDelegate<T> = String? Function(T?);
-typedef ValidateRemoveItem<T> = List<T> Function(List<T>? list, T item);
+typedef ValidateSelectedItem<FilterRule> = bool Function(List<FilterRule>? list, FilterRule item);
+typedef OnApplyButtonClick<T> = Function(List<T> list);
+typedef ChoiceChipBuilder<FilterRule> = Widget Function(BuildContext context, FilterRule? item, bool? iselected);
+typedef ItemSearchDelegate<FilterRule> = List<FilterRule> Function(List<FilterRule>? list, String text);
+typedef LabelDelegate<FilterRule> = String? Function(FilterRule?);
+typedef ValidateRemoveItem<FilterRule> = List<FilterRule> Function(List<FilterRule>? list, FilterRule item);
+typedef OnItemRemove<T> = void Function(T item, int index);
+typedef OnItemInsert<T> = void Function(T item, int index);
 
 /// The [FilterListWidget] is a widget with some filter utilities and callbacks which helps in single/multiple selection from list of data.
 ///
@@ -51,11 +53,9 @@ class FilterListWidget<T> extends StatefulWidget {
     Key? key,
     this.height,
     this.width,
-    this.listData,
     required this.choiceChipLabel,
     required this.onItemSearch,
-    this.selectedListData,
-    required this.filters,
+    required this.listFilter,
     this.borderRadius = 20,
     this.onApplyButtonClick,
     this.choiceChipBuilder,
@@ -105,14 +105,6 @@ class FilterListWidget<T> extends StatefulWidget {
   final double? width;
   final double borderRadius;
 
-  /// Pass list containing all data which neeeds to filter
-  final List<T>? listData;
-
-  /// The [selectedListData] is used to filter out items from [listData] which don't match the [filters]
-  final List<T>? selectedListData;
-
-  /// The [filters] is used to create the filtering options.
-  final List<FilterRule> filters;
   final Color? closeIconColor;
   final Color? headerTextColor;
   final Color? backgroundColor;
@@ -163,12 +155,17 @@ class FilterListWidget<T> extends StatefulWidget {
   final OnApplyButtonClick<T>? onApplyButtonClick;
 
   /// The `onItemSearch` is delagate which filter the list on the basis of search field text.
-  final ItemSearchDelegate<T> onItemSearch;
+  final ItemSearchDelegate<FilterRule> onItemSearch;
 
   /*required*/
 
   /// The `choiceChipLabel` is callback which required [String] value to display text on choice chip.
   final LabelDelegate<FilterRule> choiceChipLabel;
+
+  /*required*/
+
+  /// The `listFilter` is an object containing all the filter rules and it manages the list's items.
+  final ListFilter listFilter;
 
   /*required*/
 
@@ -233,15 +230,12 @@ class FilterListWidget<T> extends StatefulWidget {
 }
 
 class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
-  List<T>? _listData;
-  List<T> _selectedListData = <T>[];
-  List<FilterRule> _filters = <FilterRule>[];
+
+  var listFilter;
 
   @override
   void initState() {
-    _listData = widget.listData == null ? <T>[] : List.from(widget.listData!);
-    _filters = widget.filters;
-    _selectedListData = widget.selectedListData == null ? <T>[] : List<T>.from(widget.selectedListData!);
+    listFilter = widget.listFilter;
     super.initState();
   }
 
@@ -259,7 +253,7 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                   : Padding(
                       padding: EdgeInsets.only(top: 5),
                       child: Text(
-                        '${_filters.where((k) => k.selected).toList().length} ${widget.selectedFiltersText}',
+                        '${listFilter.getSelectedFilters().length} ${widget.selectedFiltersText}',
                         style: Theme.of(context).textTheme.caption,
                       ),
                     ),
@@ -353,11 +347,11 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                     searchFieldTextStyle: widget.searchFieldTextStyle,
                     onChanged: (String value) {
                       setState(() {
-                        if (value.isEmpty) {
-                          _listData = widget.listData;
-                          return;
-                        }
-                        _listData = widget.onItemSearch(widget.listData, value);
+                        // if (value.isEmpty) {
+                        //   _listData = widget.listData;
+                        //   return;
+                        // }
+                        listFilter.filters = widget.onItemSearch(listFilter.filters, value);
                       });
                     },
                   )
@@ -369,7 +363,7 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
 
   List<Widget> _buildChoiceList() {
     List<Widget> choices = [];
-    _filters.forEach(
+    listFilter.filters.forEach(
       (item) {
         choices.add(
           ChoiceChipWidget(
@@ -379,7 +373,7 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
               setState(
                 () {
                   if (widget.enableOnlySingleSelection!) {
-                    _filters.forEach((anotherItem) {
+                    listFilter.filters.forEach((anotherItem) {
                       anotherItem.selected = false;
                     });
                     item.selected = true;
@@ -449,7 +443,7 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                       ? null
                       : () {
                           setState(() {
-                            _filters.forEach((item) {
+                            listFilter.filters.forEach((item) {
                               item.selected = true;
                             });
                           });
@@ -468,7 +462,7 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                   choiceChipLabel: '${widget.resetButtonText}',
                   onPressed: () {
                     setState(() {
-                      _filters.forEach((item) {
+                      listFilter.filters.forEach((item) {
                         item.selected = false;
                       });
                     });
@@ -481,10 +475,13 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
               _controlButton(
                   choiceChipLabel: '${widget.applyButtonText}',
                   onPressed: () {
+                    setState(() {
+                      listFilter.filterItems();
+                    });
                     if (widget.onApplyButtonClick != null) {
-                      widget.onApplyButtonClick!(_selectedListData);
+                      widget.onApplyButtonClick!(listFilter.selectedListData);
                     } else {
-                      Navigator.pop(context, _selectedListData);
+                      Navigator.pop(context);
                     }
                   },
                   elevation: 5,

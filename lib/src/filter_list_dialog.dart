@@ -1,5 +1,6 @@
 library filter_list;
 
+import 'package:custom_filter_list/filter_list.dart';
 import 'package:custom_filter_list/src/filter/filter_rule.dart';
 import 'package:custom_filter_list/src/widget/choice_chip_widget.dart';
 import 'package:custom_filter_list/src/widget/search_field_widget.dart';
@@ -94,30 +95,20 @@ class FilterListDialog {
   static Future display<T>(
     context, {
 
-    /// Pass list containing all data which neeeds to filter.
-    required List<T> listData,
-
-    /// pass selected list of object
-    /// every object on selecteListData should be present in list data.
-    List<T>? selectedListData,
-
-    /// pass the list of available filtering options
-    required List<FilterRule> filters,
-
     /// Display text on choice chip.
     required LabelDelegate<FilterRule> choiceChipLabel,
 
     /// identifies weather a item is selecte or not.
-    required ValidateSelectedItem<T> validateSelectedItem,
+    required ValidateSelectedItem<FilterRule> validateSelectedItem,
 
-    /// The `validateRemoveItem` identifies if a item should be remove or not and returns the list filtered.
-    ValidateRemoveItem<T>? validateRemoveItem,
+    /// The filters object
+    required ListFilter<T> listFilter,
 
     /// filter list on the basis of search field text.
     /// When text change in search text field then return list containing that text value.
     ///
     ///Check if list has value which matches to text.
-    required ItemSearchDelegate<T> onItemSearch,
+    required ItemSearchDelegate<FilterRule> onItemSearch,
 
     /// Return list of all selected items
     required OnApplyButtonClick<T> onApplyButtonClick,
@@ -280,19 +271,17 @@ class FilterListDialog {
             width: width,
             color: Colors.transparent,
             child: FilterListWidget(
-              listData: listData,
               choiceChipLabel: choiceChipLabel,
               width: width,
               height: height,
               hideHeader: hideheader,
               borderRadius: borderRadius,
               headlineText: headlineText,
+              listFilter: listFilter,
               onItemSearch: onItemSearch,
               closeIconColor: closeIconColor,
               headerTextStyle: headerTextStyle,
               backgroundColor: backgroundColor,
-              selectedListData: selectedListData,
-              filters: filters,
               onApplyButtonClick: onApplyButtonClick,
               hideSelectedTextCount: hideSelectedTextCount,
               hideCloseIcon: hideCloseIcon,

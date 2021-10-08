@@ -27,14 +27,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<User>? selectedUserList = [];
+  List<User> selectedUserList = [];
 
   void _openFilterDialog() async {
     await FilterListDialog.display<User>(
       context,
-      listData: userList,
-      selectedListData: selectedUserList,
-      filters: [AppFilters.ageFilter, AppFilters.heightFilter],
+      listFilter: ListFilter(userList, selectedUserList, [AppFilters.ageFilter, AppFilters.heightFilter]) ,
       height: 480,
       headlineText: "Select Users",
       searchFieldHintText: "Search Here",
@@ -47,9 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
       onItemSearch: (list, text) {
         if (list != null) {
-          if (list.any((element) => element.name.toLowerCase().contains(text.toLowerCase()))) {
+          if (list.any((element) => element.getName().toLowerCase().contains(text.toLowerCase()))) {
             /// return list which contains matches
-            return list.where((element) => element.name.toLowerCase().contains(text.toLowerCase())).toList();
+            return list.where((element) => element.getName().toLowerCase().contains(text.toLowerCase())).toList();
           }
         }
 
@@ -58,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       onApplyButtonClick: (list) {
         setState(() {
-          selectedUserList = List.from(list!);
+          selectedUserList = list;
         });
         Navigator.pop(context);
       },
@@ -84,6 +82,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print("build called");
+    print(selectedUserList.toList());
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title!),
@@ -127,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: <Widget>[
-          selectedUserList == null || selectedUserList!.length == 0
+          selectedUserList == null || selectedUserList.length == 0
               ? Expanded(
                   child: Center(
                     child: Text('No text selected'),
@@ -137,11 +138,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: ListView.separated(
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(selectedUserList![index].name),
+                          title: Text(selectedUserList[index].name),
                         );
                       },
                       separatorBuilder: (context, index) => Divider(),
-                      itemCount: selectedUserList!.length),
+                      itemCount: selectedUserList.length),
                 ),
         ],
       ),
@@ -150,9 +151,9 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class FilterPage extends StatelessWidget {
-  const FilterPage({Key? key, this.allTextList, this.selectedUserList}) : super(key: key);
+  const FilterPage({Key? key, this.allTextList, required this.selectedUserList}) : super(key: key);
   final List<User>? allTextList;
-  final List<User>? selectedUserList;
+  final List<User> selectedUserList;
 
   @override
   Widget build(BuildContext context) {
@@ -162,9 +163,7 @@ class FilterPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: FilterListWidget<User>(
-          listData: userList,
-          selectedListData: selectedUserList,
-          filters: [AppFilters.ageFilter, AppFilters.heightFilter],
+          listFilter: ListFilter(userList, selectedUserList, [AppFilters.ageFilter, AppFilters.heightFilter]) ,
           hideHeaderText: true,
           onApplyButtonClick: (list) {
             Navigator.pop(context, list);
@@ -188,9 +187,9 @@ class FilterPage extends StatelessWidget {
             /// When text change in search text field then return list containing that text value
             ///
             ///Check if list has value which matchs to text
-            if (list!.any((element) => element.name.toLowerCase().contains(text.toLowerCase()))) {
+            if (list!.any((element) => element.getName().toLowerCase().contains(text.toLowerCase()))) {
               /// return list which contains matches
-              return list.where((element) => element.name.toLowerCase().contains(text.toLowerCase())).toList();
+              return list.where((element) => element.getName().toLowerCase().contains(text.toLowerCase())).toList();
             }
             return [];
           },
