@@ -1,5 +1,6 @@
 library filter_list;
 
+import 'package:custom_filter_list/src/filter/filter_rule.dart';
 import 'package:custom_filter_list/src/widget/choice_chip_widget.dart';
 import 'package:custom_filter_list/src/widget/search_field_widget.dart';
 import 'package:flutter/material.dart';
@@ -100,8 +101,11 @@ class FilterListDialog {
     /// every object on selecteListData should be present in list data.
     List<T>? selectedListData,
 
+    /// pass the list of available filtering options
+    required List<FilterRule> filters,
+
     /// Display text on choice chip.
-    required LabelDelegate<T> choiceChipLabel,
+    required LabelDelegate<FilterRule> choiceChipLabel,
 
     /// identifies weather a item is selecte or not.
     required ValidateSelectedItem<T> validateSelectedItem,
@@ -230,8 +234,7 @@ class FilterListDialog {
     /// This defines the minimum space between the screen's edges and the dialog.
     ///
     /// Defaults to EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0).
-    EdgeInsets? insetPadding =
-        const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
+    EdgeInsets? insetPadding = const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
 
     /// The `choiceChipBuilder` is a builder to design custom choice chip.
     ChoiceChipBuilder? choiceChipBuilder,
@@ -289,8 +292,8 @@ class FilterListDialog {
               headerTextStyle: headerTextStyle,
               backgroundColor: backgroundColor,
               selectedListData: selectedListData,
+              filters: filters,
               onApplyButtonClick: onApplyButtonClick,
-              validateSelectedItem: validateSelectedItem,
               hideSelectedTextCount: hideSelectedTextCount,
               hideCloseIcon: hideCloseIcon,
               hideHeaderText: hideHeaderText,
@@ -304,18 +307,17 @@ class FilterListDialog {
               unselectedChipTextStyle: unselectedChipTextStyle,
               enableOnlySingleSelection: enableOnlySingleSelection,
               searchFieldBackgroundColor: searchFieldBackgroundColor,
-              applyButonTextBackgroundColor: applyButonTextBackgroundColor,
-              selectedItemsText: selectedItemsText,
+              applyButtonTextBackgroundColor: applyButonTextBackgroundColor,
+              selectedFiltersText: selectedItemsText,
               applyButtonText: applyButtonText,
               resetButtonText: resetButtonText,
               allButtonText: allButtonText,
               buttonRadius: buttonRadius,
               controlContainerDecoration: controlContainerDecoration,
               buttonSpacing: buttonSpacing,
-              validateRemoveItem: validateRemoveItem,
               headerTextColor: headerTextColor,
               selectedTextBackgroundColor: selectedTextBackgroundColor,
-              unselectedTextbackGroundColor: unselectedTextbackGroundColor,
+              unselectedTextBackgroundColor: unselectedTextbackGroundColor,
               wrapAlignment: wrapAlignment,
               wrapCrossAxisAlignment: wrapCrossAxisAlignment,
               wrapSpacing: wrapSpacing,
