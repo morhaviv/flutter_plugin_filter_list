@@ -481,9 +481,8 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                     });
                     if (widget.onApplyButtonClick != null) {
                       widget.onApplyButtonClick!(listFilter.selectedListData);
-                    } else {
-                      Navigator.pop(context);
                     }
+                    Navigator.pop(context);
                   },
                   elevation: 5,
                   backgroundColor: widget.applyButtonTextBackgroundColor!,

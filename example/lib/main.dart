@@ -32,7 +32,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _openFilterDialog() async {
     await FilterListDialog.display<User>(
       context,
-      listFilter: ListFilter(userList, selectedUserList, [AppFilters.ageFilter, AppFilters.heightFilter]) ,
+      listFilter: ListFilter(userList, selectedUserList, [AppFilters.ageFilter, AppFilters.heightFilter], itemsCompare: (item1, item2) {
+        return item1.name == item2.name;
+      }) ,
       height: 480,
       headlineText: "Select Users",
       searchFieldHintText: "Search Here",
@@ -82,9 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("build called");
-    print(selectedUserList.toList());
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title!),
@@ -163,8 +162,9 @@ class FilterPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: FilterListWidget<User>(
-          listFilter: ListFilter(userList, selectedUserList, [AppFilters.ageFilter, AppFilters.heightFilter]) ,
-          hideHeaderText: true,
+          listFilter: ListFilter(userList, selectedUserList, [AppFilters.ageFilter, AppFilters.heightFilter], itemsCompare: (item1, item2) {
+            return item1.name == item2.name;
+          }) ,          hideHeaderText: true,
           onApplyButtonClick: (list) {
             Navigator.pop(context, list);
           },
