@@ -8,6 +8,7 @@ typedef LabelDelegate<FilterRule> = String? Function(FilterRule?);
 typedef ValidateRemoveItem<FilterRule> = List<FilterRule> Function(List<FilterRule>? list, FilterRule item);
 typedef OnItemRemove<T> = void Function(T item, int index);
 typedef OnItemInsert<T> = void Function(T item, int index);
+typedef ItemsCompare<T> = bool Function(T item1, T item2);
 
 /// The [FilterListWidget] is a widget with some filter utilities and callbacks which helps in single/multiple selection from list of data.
 ///

@@ -14,17 +14,23 @@ class ListFilter<T> {
   /// The `onItemInsert` is being called when an item is inserted to the selectedList.
   final OnItemInsert<T>? onItemInsert;
 
-  ListFilter(this.listData, this.selectedListData, this.filters, {this.onItemRemove, this.onItemInsert});
+  /// The `onItemInsert` is being called when an item is inserted to the selectedList.
+  final ItemsCompare<T> itemsCompare;
+
+  ListFilter(this.listData, this.selectedListData, this.filters, {required this.itemsCompare, this.onItemRemove, this.onItemInsert});
 
   void filterItems() {
     List<T> newItems = [];
+    int j = -1;
+
     for (int i = 0; i < listData.length; i++) {
       T element = listData[i];
 
       bool shouldDisplay = true;
       bool previous = false;
-      if (selectedListData.contains(element)) {
+      if (_checkIfListOfItemsContainer(selectedListData, element)) {
         previous = true;
+        j++;
       }
       getSelectedFilters().forEach((filter) {
         if (!filter.shouldDisplay(element)) {
@@ -37,18 +43,29 @@ class ListFilter<T> {
         newItems.add(element);
         if (!previous) {
           if (onItemInsert != null) {
-            onItemInsert!(element, i);
+            j++;
+            onItemInsert!(element, j);
           }
         }
       } else {
         if (previous) {
           if (onItemRemove != null) {
-            onItemRemove!(element, i);
+            onItemRemove!(element, j);
+            j--;
           }
         }
       }
     }
     selectedListData = newItems;
+  }
+
+  bool _checkIfListOfItemsContainer(List<T> items, T item) {
+    for (int i = 0; i < items.length; i++) {
+      if (itemsCompare(items[i], item)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   List<FilterRule> getSelectedFilters() {

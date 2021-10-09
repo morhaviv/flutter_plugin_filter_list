@@ -1,6 +1,6 @@
 name: custom_filter_list
 description: Filter_list Package is designed to make single/multiple item filters from a list of rules.
-version: 1.0.0
+version: 0.0.1
 homepage: https://github.com/morhaviv/flutter_plugin_filter_list
 
 environment:
