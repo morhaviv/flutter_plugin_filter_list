@@ -282,11 +282,10 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Expanded(
-                  flex: 1,
                   child: Container(),
                 ),
                 Expanded(
-                  flex: 6,
+                  flex: 10,
                   child: Center(
                     child: widget.hideHeaderText!
                         ? Container()
@@ -297,26 +296,28 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                   ),
                 ),
                 Expanded(
-                  flex: 1,
-                  child: InkWell(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                    onTap: () {
-                      if (widget.onCloseButtonClick != null) {
-                        widget.onCloseButtonClick!();
-                      }
-                      Navigator.pop(context, null);
-                    },
-                    child: widget.hideCloseIcon
-                        ? SizedBox()
-                        : Container(
-                            height: 25,
-                            width: 25,
-                            decoration: BoxDecoration(border: Border.all(color: widget.closeIconColor!), shape: BoxShape.circle),
-                            child: Icon(
-                              Icons.close,
-                              color: widget.closeIconColor,
+                  child: Align(
+                    alignment: (Directionality.of(context) == TextDirection.ltr ? Alignment.centerRight : Alignment.centerLeft),
+                    child: InkWell(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      onTap: () {
+                        if (widget.onCloseButtonClick != null) {
+                          widget.onCloseButtonClick!();
+                        }
+                        Navigator.pop(context, null);
+                      },
+                      child: widget.hideCloseIcon
+                          ? SizedBox()
+                          : Container(
+                              height: 25,
+                              width: 25,
+                              decoration: BoxDecoration(border: Border.all(color: widget.closeIconColor!), shape: BoxShape.circle),
+                              child: Icon(
+                                Icons.close,
+                                color: widget.closeIconColor,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                 ),
               ],
