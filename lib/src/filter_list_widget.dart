@@ -2,8 +2,8 @@ part of 'filter_list_dialog.dart';
 
 typedef ValidateSelectedItem<FilterRule> = bool Function(List<FilterRule>? list, FilterRule item);
 typedef OnApplyButtonClick<T> = Function(List<T> list);
+typedef OnCloseButtonClick<T> = Function();
 typedef ChoiceChipBuilder<FilterRule> = Widget Function(BuildContext context, FilterRule? item, bool? iselected);
-typedef ItemSearchDelegate<FilterRule> = List<FilterRule> Function(List<FilterRule>? list, String text);
 typedef LabelDelegate<FilterRule> = String? Function(FilterRule?);
 typedef ValidateRemoveItem<FilterRule> = List<FilterRule> Function(List<FilterRule>? list, FilterRule item);
 typedef OnItemRemove<T> = void Function(T item, int index);
@@ -33,20 +33,6 @@ typedef ItemsCompare<T> = bool Function(T item1, T item2);
 ///      ///  identify if item is selected or not
 ///      return list!.contains(val);
 ///    },
-///    onItemSearch: (list, text) {
-///      /// When text change in search text field then return list containing that text value
-///      ///
-///      ///Check if list has value which matchs to text
-///      if (list!.any((element) =>
-///          element.toLowerCase().contains(text.toLowerCase()))) {
-///        /// return list which contains matches
-///        return list
-///            .where((element) =>
-///                element.toLowerCase().contains(text.toLowerCase()))
-///            .toList();
-///      }
-///      return [];
-///    },
 ///   )
 /// ```
 class FilterListWidget<T> extends StatefulWidget {
@@ -55,10 +41,10 @@ class FilterListWidget<T> extends StatefulWidget {
     this.height,
     this.width,
     required this.choiceChipLabel,
-    required this.onItemSearch,
     required this.listFilter,
     this.borderRadius = 20,
     this.onApplyButtonClick,
+    this.onCloseButtonClick,
     this.choiceChipBuilder,
     this.selectedChipTextStyle,
     this.unselectedChipTextStyle,
@@ -155,10 +141,8 @@ class FilterListWidget<T> extends StatefulWidget {
   /// The `onApplyButtonClick` is a callback which return list of all selected items on apply button click.  if no item is selected then it will return empty list.
   final OnApplyButtonClick<T>? onApplyButtonClick;
 
-  /// The `onItemSearch` is delagate which filter the list on the basis of search field text.
-  final ItemSearchDelegate<FilterRule> onItemSearch;
-
-  /*required*/
+  /// The `onCloseButtonClick` is a callback on close button click
+  final OnCloseButtonClick<T>? onCloseButtonClick;
 
   /// The `choiceChipLabel` is callback which required [String] value to display text on choice chip.
   final LabelDelegate<FilterRule> choiceChipLabel;
@@ -231,7 +215,6 @@ class FilterListWidget<T> extends StatefulWidget {
 }
 
 class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
-
   var listFilter;
 
   @override
@@ -318,6 +301,9 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                   child: InkWell(
                     borderRadius: BorderRadius.all(Radius.circular(30)),
                     onTap: () {
+                      if (widget.onCloseButtonClick != null) {
+                        widget.onCloseButtonClick!();
+                      }
                       Navigator.pop(context, null);
                     },
                     child: widget.hideCloseIcon
@@ -348,11 +334,7 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
                     searchFieldTextStyle: widget.searchFieldTextStyle,
                     onChanged: (String value) {
                       setState(() {
-                        // if (value.isEmpty) {
-                        //   _listData = widget.listData;
-                        //   return;
-                        // }
-                        listFilter.filters = widget.onItemSearch(listFilter.filters, value);
+                        searchFilter(value);
                       });
                     },
                   )
@@ -362,36 +344,48 @@ class _FilterListWidgetState<T> extends State<FilterListWidget<T>> {
     );
   }
 
+  void searchFilter(String value) {
+    listFilter.filters.forEach((element) {
+      if (element.getName().toLowerCase().contains(value.toLowerCase())) {
+        element.view = true;
+      } else {
+        element.view = false;
+      }
+    });
+  }
+
   List<Widget> _buildChoiceList() {
     List<Widget> choices = [];
     listFilter.filters.forEach(
       (item) {
-        choices.add(
-          ChoiceChipWidget(
-            choiceChipBuilder: widget.choiceChipBuilder,
-            item: item,
-            onSelected: (value) {
-              setState(
-                () {
-                  if (widget.enableOnlySingleSelection!) {
-                    listFilter.filters.forEach((anotherItem) {
-                      anotherItem.selected = false;
-                    });
-                    item.selected = true;
-                  } else {
-                    item.selected = !item.selected;
-                  }
-                },
-              );
-            },
-            selected: item.selected,
-            selectedTextBackgroundColor: widget.selectedTextBackgroundColor,
-            unselectedTextBackgroundColor: widget.unselectedTextBackgroundColor,
-            selectedChipTextStyle: widget.selectedChipTextStyle,
-            unselectedChipTextStyle: widget.unselectedChipTextStyle,
-            text: widget.choiceChipLabel(item),
-          ),
-        );
+        if (item.view) {
+          choices.add(
+            ChoiceChipWidget(
+              choiceChipBuilder: widget.choiceChipBuilder,
+              item: item,
+              onSelected: (value) {
+                setState(
+                  () {
+                    if (widget.enableOnlySingleSelection!) {
+                      listFilter.filters.forEach((anotherItem) {
+                        anotherItem.selected = false;
+                      });
+                      item.selected = true;
+                    } else {
+                      item.selected = !item.selected;
+                    }
+                  },
+                );
+              },
+              selected: item.selected,
+              selectedTextBackgroundColor: widget.selectedTextBackgroundColor,
+              unselectedTextBackgroundColor: widget.unselectedTextBackgroundColor,
+              selectedChipTextStyle: widget.selectedChipTextStyle,
+              unselectedChipTextStyle: widget.unselectedChipTextStyle,
+              text: widget.choiceChipLabel(item),
+            ),
+          );
+        }
       },
     );
     choices.add(

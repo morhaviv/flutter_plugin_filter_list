@@ -7,8 +7,9 @@ class FilterRule {
   String? choiceName;
   final ShouldDisplay shouldDisplay;
   bool selected;
+  bool view;
 
-  FilterRule(this.key, this.shouldDisplay, {this.choiceName, this.selected = false});
+  FilterRule(this.key, this.shouldDisplay, {this.choiceName, this.selected = false, this.view = true});
 
   String getName() {
     if (this.choiceName != null) {

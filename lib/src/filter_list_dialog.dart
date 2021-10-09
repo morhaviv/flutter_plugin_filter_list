@@ -20,21 +20,6 @@ part 'filter_list_widget.dart';
 ///
 /// The [validateSelectedItem] used to identifies weather a item is selecte or not.
 ///
-/// [onItemSearch] filter the list on the basis of search field text. It expose search api to permform search operation accoding to requirement.
-/// When text change in search text field then return a list of element which contains specific text. if no element found then it should return empty list.
-///
-/// ```dart
-///    onItemSearch: (list, text) {
-///     if (list.any((element) =>
-///         element.toLowerCase().contains(text.toLowerCase()))) {
-///       /// return list which contains matches
-///       return list
-///           .where((element) =>
-///               element.toLowerCase().contains(text.toLowerCase()))
-///           .toList();
-///     }
-///   },
-/// ```
 ///
 /// The [choiceChipBuilder] is a builder to design custom choice chip.
 ///
@@ -65,17 +50,6 @@ part 'filter_list_widget.dart';
 ///        validateSelectedItem: (list, val) {
 ///          return list!.contains(val);
 ///        },
-///        onItemSearch: (list, text) {
-///          if (list!.any((element) =>
-///              element.toLowerCase().contains(text.toLowerCase()))) {
-///            /// return list which contains text matches
-///            return list
-///                .where((element) =>
-///                    element.toLowerCase().contains(text.toLowerCase()))
-///                .toList();
-///          }
-///          return [];
-///        },
 ///        height: 480,
 ///        borderRadius: 20,
 ///        headlineText: "Select Count",
@@ -104,14 +78,11 @@ class FilterListDialog {
     /// The filters object
     required ListFilter<T> listFilter,
 
-    /// filter list on the basis of search field text.
-    /// When text change in search text field then return list containing that text value.
-    ///
-    ///Check if list has value which matches to text.
-    required ItemSearchDelegate<FilterRule> onItemSearch,
-
     /// Return list of all selected items
-    required OnApplyButtonClick<T> onApplyButtonClick,
+    OnApplyButtonClick<T>? onApplyButtonClick,
+
+    /// Being called when the X button is being clicked
+    OnCloseButtonClick<T>? onCloseButtonClick,
 
     /// Height of the dialog
     double? height,
@@ -138,7 +109,7 @@ class FilterListDialog {
     bool hideCloseIcon = false,
 
     /// Used to hide header.
-    bool hideheader = false,
+    bool hideHeader = false,
 
     /// Used to hide header text.
     bool hideHeaderText = false,
@@ -147,7 +118,7 @@ class FilterListDialog {
     Color closeIconColor = Colors.black,
     Color headerTextColor = Colors.black,
     Color selectedTextBackgroundColor = Colors.blue,
-    Color unselectedTextbackGroundColor = const Color(0xfff8f8f8),
+    Color unselectedTextBackgroundColor = const Color(0xfff8f8f8),
 
     /// The `barrierDismissible` argument is used to indicate whether tapping on the barrier will dismiss the dialog.
     ///
@@ -274,15 +245,15 @@ class FilterListDialog {
               choiceChipLabel: choiceChipLabel,
               width: width,
               height: height,
-              hideHeader: hideheader,
+              hideHeader: hideHeader,
               borderRadius: borderRadius,
               headlineText: headlineText,
               listFilter: listFilter,
-              onItemSearch: onItemSearch,
               closeIconColor: closeIconColor,
               headerTextStyle: headerTextStyle,
               backgroundColor: backgroundColor,
               onApplyButtonClick: onApplyButtonClick,
+              onCloseButtonClick: onCloseButtonClick,
               hideSelectedTextCount: hideSelectedTextCount,
               hideCloseIcon: hideCloseIcon,
               hideHeaderText: hideHeaderText,
@@ -306,7 +277,7 @@ class FilterListDialog {
               buttonSpacing: buttonSpacing,
               headerTextColor: headerTextColor,
               selectedTextBackgroundColor: selectedTextBackgroundColor,
-              unselectedTextBackgroundColor: unselectedTextbackGroundColor,
+              unselectedTextBackgroundColor: unselectedTextBackgroundColor,
               wrapAlignment: wrapAlignment,
               wrapCrossAxisAlignment: wrapCrossAxisAlignment,
               wrapSpacing: wrapSpacing,
